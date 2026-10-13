@@ -63,11 +63,19 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Configure Android platform project
+        working-directory: mobile
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --org ng.dispatch --project-name rider_app --platforms android .
+          fi
+
       - name: Setup signing
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
         run: |
+          mkdir -p mobile/android/app
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 --decode > mobile/android/app/keystore.jks
             echo "$KEY_PROPERTIES" > mobile/android/key.properties
@@ -119,6 +127,13 @@ jobs:
           flutter-version: '3.24.x'
           channel: 'stable'
           cache: true
+
+      - name: Configure iOS platform project
+        working-directory: mobile
+        run: |
+          if [ ! -d "ios" ]; then
+            flutter create --org ng.dispatch --project-name rider_app --platforms ios .
+          fi
 
       - uses: apple-actions/import-codesign-certs@v2
         with:
