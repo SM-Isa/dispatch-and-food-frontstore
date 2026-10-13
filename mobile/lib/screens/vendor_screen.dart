@@ -185,7 +185,7 @@ class _VendorScreenState extends State<VendorScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.between,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Add Dish to Kitchen Menu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
@@ -322,7 +322,7 @@ class _VendorScreenState extends State<VendorScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +351,7 @@ class _VendorScreenState extends State<VendorScreen> {
           const SizedBox(height: 20),
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Incoming Kitchen Queue', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Container(
@@ -395,7 +395,7 @@ class _VendorScreenState extends State<VendorScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.between,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(order['order_number'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                           Container(
@@ -446,7 +446,7 @@ class _VendorScreenState extends State<VendorScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.between,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

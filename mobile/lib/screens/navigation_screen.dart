@@ -133,7 +133,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         title: Text(
           _navStage == 'TO_VENDOR'
               ? 'Pickup Navigation: $vendorName'
-              : 'Dropoff Navigation: Customer',
+              : 'Dropoff Navigation: $customerAddress',
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -420,7 +420,7 @@ class RouteMapPainter extends CustomPainter {
     final riderX = startX + (endX - startX) * progress;
     final riderY = startY +
         (endY - startY) * progress -
-        math.sin(progress * math.PI) * 40;
+        math.sin(progress * math.pi) * 40;
 
     // Pulse radar ring
     final radarPaint = Paint()

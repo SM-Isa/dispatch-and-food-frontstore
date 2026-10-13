@@ -34,5 +34,6 @@
     "flutter"
   ],
   "author": "",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.15.9"
 }

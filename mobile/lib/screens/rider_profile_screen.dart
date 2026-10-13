@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../core/constants/api_constants.dart';
 import '../core/services/api_service.dart';
@@ -65,7 +64,7 @@ class _RiderProfileScreenState extends State<RiderProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.between,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Report Delivery Incident / Delay',
@@ -239,7 +238,7 @@ class _RiderProfileScreenState extends State<RiderProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Operating Cluster Zone',

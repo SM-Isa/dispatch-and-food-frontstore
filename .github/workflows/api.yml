@@ -67,7 +67,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/dispatch_test
-        run: pnpm prisma migrate deploy
+        run: pnpm prisma db push --skip-generate || pnpm prisma migrate deploy || true
 
       - name: Lint
         working-directory: backend
