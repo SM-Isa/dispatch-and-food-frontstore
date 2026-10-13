@@ -1,0 +1,45 @@
+# .github/workflows/pr-checks.yml
+name: PR Checks
+
+on:
+  pull_request:
+
+jobs:
+  changed:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      portals: ${{ steps.filter.outputs.portals }}
+      rider: ${{ steps.filter.outputs.rider }}
+      infra: ${{ steps.filter.outputs.infra }}
+      prompts: ${{ steps.filter.outputs.prompts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api: 'backend/**'
+            portals: 'frontend/**'
+            rider: 'mobile/**'
+            infra: 'infra/**'
+            prompts: 'backend/src/modules/ai/**'
+
+  check-conventional:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            ci
+            perf

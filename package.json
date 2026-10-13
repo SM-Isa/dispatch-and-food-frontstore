@@ -1,0 +1,38 @@
+{
+  "name": "dispatch-and-food-frontstore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dispatch Rider Aggregator & Food Vendor Storefront monorepo",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:backend": "npm run start:dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "db:init": "docker-compose exec -T postgres psql -U postgres -d dispatch_storefront < database/ddl.sql && docker-compose exec -T postgres psql -U postgres -d dispatch_storefront < database/seed.sql",
+    "db:reconcile": "docker-compose exec -T postgres psql -U postgres -d dispatch_storefront < database/reconciliation.sql",
+    "test": "npm run test --workspace=backend",
+    "test:unit": "npm run test:unit --workspace=backend",
+    "test:e2e": "npm run test:e2e --workspace=backend",
+    "test:e2e:lifecycle": "npm run test:e2e:lifecycle --workspace=backend"
+  },
+  "keywords": [
+    "dispatch",
+    "logistics",
+    "food-delivery",
+    "postgis",
+    "double-entry-ledger",
+    "nestjs",
+    "nextjs",
+    "flutter"
+  ],
+  "author": "",
+  "license": "UNLICENSED"
+}

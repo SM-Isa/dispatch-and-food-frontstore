@@ -1,0 +1,97 @@
+# .github/workflows/portals.yml
+name: Portals
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'packages/**'
+      - '.github/workflows/portals.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - 'packages/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '9' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        working-directory: frontend
+        run: pnpm lint
+      - name: Typecheck
+        working-directory: frontend
+        run: pnpm typecheck
+      - name: Build
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: https://api.dispatch.ng
+        run: pnpm build
+      - name: Test
+        working-directory: frontend
+        run: pnpm test --passWithNoTests
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    strategy:
+      matrix:
+        include:
+          - app: vendor-portal
+            service: prod-dispatch-vendor-portal
+          - app: customer-pwa
+            service: prod-dispatch-customer-pwa
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/github/providers/github'
+          service_account: 'terraform-runner@dispatch-prod.iam.gserviceaccount.com'
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+
+      - name: Build and push
+        working-directory: frontend
+        run: |
+          IMAGE="europe-west1-docker.pkg.dev/dispatch-prod/dispatch-containers/${{ matrix.app }}:${GITHUB_SHA::8}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Deploy
+        run: |
+          gcloud run deploy ${{ matrix.service }} \
+            --image="$IMAGE" \
+            --region=europe-west1 \
+            --no-traffic \
+            --tag=canary
+
+          gcloud run services update-traffic ${{ matrix.service }} \
+            --region=europe-west1 \
+            --to-tags=canary=10
+
+      - name: Smoke test
+        run: |
+          URL=$(gcloud run services describe ${{ matrix.service }} \
+            --region=europe-west1 \
+            --format='value(status.traffic[?tag=canary].url)' | head -1)
+          curl -sf "$URL/" > /dev/null && exit 0
+          sleep 5
+          curl -sf "$URL/" > /dev/null

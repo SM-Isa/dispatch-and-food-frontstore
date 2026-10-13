@@ -1,0 +1,81 @@
+export enum UserRole {
+  CUSTOMER = 'CUSTOMER',
+  VENDOR_OWNER = 'VENDOR_OWNER',
+  RIDER = 'RIDER',
+  ADMIN = 'ADMIN',
+  SUPPORT = 'SUPPORT',
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  PREPARING = 'PREPARING',
+  AWAITING_RIDER = 'AWAITING_RIDER',
+  RIDER_ASSIGNED = 'RIDER_ASSIGNED',
+  PICKED_UP = 'PICKED_UP',
+  DELIVERED = 'DELIVERED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED',
+}
+
+export enum DeliveryStatus {
+  LOOKING_FOR_RIDER = 'LOOKING_FOR_RIDER',
+  ACCEPTED = 'ACCEPTED',
+  PICKED_UP = 'PICKED_UP',
+  DELIVERED = 'DELIVERED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum WalletType {
+  VENDOR = 'VENDOR',
+  RIDER = 'RIDER',
+  PLATFORM = 'PLATFORM',
+  CUSTOMER_ESCROW = 'CUSTOMER_ESCROW',
+  RIDER_POOL = 'RIDER_POOL',
+  PAYOUT_IN_TRANSIT = 'PAYOUT_IN_TRANSIT',
+  BANK_SETTLEMENT = 'BANK_SETTLEMENT',
+  PLATFORM_LOSS = 'PLATFORM_LOSS',
+  REFUND_POOL = 'REFUND_POOL',
+}
+
+export enum LedgerDirection {
+  CREDIT = 'CREDIT',
+  DEBIT = 'DEBIT',
+}
+
+export enum PayoutStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  PAID = 'PAID',
+  FAILED = 'FAILED',
+  REVERSED = 'REVERSED',
+}
+
+export enum DispatchResponse {
+  OFFERED = 'OFFERED',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  TIMED_OUT = 'TIMED_OUT',
+}
+
+export enum NotificationChannel {
+  SMS = 'SMS',
+  PUSH = 'PUSH',
+  WHATSAPP = 'WHATSAPP',
+  EMAIL = 'EMAIL',
+}
+
+export enum NotificationStatus {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  FAILED = 'FAILED',
+}
+
+export enum PaymentProvider {
+  MONNIFY = 'MONNIFY',
+  KORAPAY = 'KORAPAY',
+  MANUAL = 'MANUAL',
+}

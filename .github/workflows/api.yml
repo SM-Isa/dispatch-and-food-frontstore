@@ -1,0 +1,169 @@
+# .github/workflows/api.yml
+name: API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+      - '.github/workflows/api.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: dispatch_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: pnpm prisma generate
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/dispatch_test
+        run: pnpm prisma migrate deploy
+
+      - name: Lint
+        working-directory: backend
+        run: pnpm lint
+
+      - name: Typecheck
+        working-directory: backend
+        run: pnpm typecheck
+
+      - name: Unit tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/dispatch_test
+          REDIS_URL: redis://localhost:6379
+        run: pnpm test:unit --coverage
+
+      - name: Integration tests (ledger + dispatch)
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/dispatch_test
+          REDIS_URL: redis://localhost:6379
+        run: pnpm test:integration
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage/lcov.info
+          fail_ci_if_error: false
+
+  build-and-deploy:
+    name: Build & Deploy
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write' # for Workload Identity Federation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/github/providers/github'
+          service_account: 'terraform-runner@dispatch-prod.iam.gserviceaccount.com'
+
+      - uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+
+      - name: Build and push API image
+        working-directory: backend
+        run: |
+          IMAGE="europe-west1-docker.pkg.dev/dispatch-prod/dispatch-containers/api:${GITHUB_SHA::8}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Deploy to Cloud Run (canary 10%)
+        run: |
+          gcloud run deploy prod-dispatch-api \
+            --image="$IMAGE" \
+            --region=europe-west1 \
+            --no-traffic \
+            --tag=canary
+
+          gcloud run services update-traffic prod-dispatch-api \
+            --region=europe-west1 \
+            --to-tags=canary=10
+
+      - name: Smoke test canary
+        run: |
+          CANARY_URL=$(gcloud run services describe prod-dispatch-api \
+            --region=europe-west1 \
+            --format='value(status.traffic[?tag=canary].url)' | head -1)
+          for i in 1 2 3 4 5; do
+            curl -sf "$CANARY_URL/health" && exit 0
+            sleep 10
+          done
+          exit 1
+
+      - name: Promote to 100%
+        run: |
+          gcloud run services update-traffic prod-dispatch-api \
+            --region=europe-west1 \
+            --to-latest
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "API deploy ${{ job.status }} — ${{ github.sha }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
