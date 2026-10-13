@@ -45,7 +45,7 @@ All error responses adhere to the standard NestJS exception schema:
 | :--- | :--- | :--- | :---: |
 | [1. Authentication & Sessions](#1-authentication--sessions-auth) | `/auth` | `auth.controller.ts` | 5 |
 | [2. Admin Authentication & MFA](#2-admin-authentication--mfa-adminauth) | `/admin/auth` | `admin-auth.controller.ts` | 4 |
-| [3. User Profiles](#3-user-profiles-users) | `/users` | `users.controller.ts` | 2 |
+| [3. User Profiles & Address Book](#3-user-profiles--address-book-users) | `/users` | `users.controller.ts` | 5 |
 | [4. Vendors & Storefronts](#4-vendors--storefronts-vendors) | `/vendors` | `vendors.controller.ts` | 5 |
 | [5. Products & Menus](#5-products--menus-products) | `/products` | `products.controller.ts` | 5 |
 | [6. Orders & Cart Lifecycle](#6-orders--cart-lifecycle-orders) | `/orders` | `orders.controller.ts` | 6 |
@@ -62,7 +62,9 @@ All error responses adhere to the standard NestJS exception schema:
 | [17. AI Dispatch Demand Forecasting](#17-ai-dispatch-demand-forecasting-aidispatch) | `/ai/dispatch` | `forecast.controller.ts` | 2 |
 | [18. AI Fraud Anomaly Scoring](#18-ai-fraud-anomaly-scoring-aifraud--adminaifraud) | `/ai/fraud` | `fraud.controller.ts` | 3 |
 | [19. AI Customer Support Triage](#19-ai-customer-support-triage-support--adminaisupport) | `/support` | `support.controller.ts` | 4 |
-| **Total** | | | **69 Endpoints** |
+| [20. Coupons & Promo Vouchers](#20-coupons--promo-vouchers-coupons) | `/coupons` | `coupons.controller.ts` | 1 |
+| [21. Platform Operations & Interventions](#21-platform-operations--interventions-admin) | `/admin` | `admin.controller.ts` | 10 |
+| **Total** | | | **83 Endpoints** |
 
 ---
 
@@ -200,6 +202,45 @@ All error responses adhere to the standard NestJS exception schema:
   }
   ```
 - **Responses**: `200 OK`
+
+### `GET /users/me/addresses`
+- **Purpose**: Retrieves all saved delivery addresses for the authenticated customer.
+- **Access**: `Bearer JWT (CUSTOMER)`
+- **Responses**:
+  - `200 OK`:
+    ```json
+    [
+      {
+        "id": "addr_01",
+        "label": "Home",
+        "street": "14 University Road, Tanke",
+        "landmark": "Opposite Bovas Filling Station",
+        "cluster_zone": "TANKE",
+        "is_default": true
+      }
+    ]
+    ```
+
+### `POST /users/me/addresses`
+- **Purpose**: Adds a new delivery address with optional default flag and cluster zone to the user's address book.
+- **Access**: `Bearer JWT (CUSTOMER)`
+- **Request Body**:
+  ```json
+  {
+    "label": "Office",
+    "street": "Plot 14, Fate Road",
+    "landmark": "Near Fate Roundabout",
+    "clusterZone": "GRA",
+    "isDefault": false
+  }
+  ```
+- **Responses**: `201 Created`
+
+### `PATCH /users/me/addresses/:id/delete`
+- **Purpose**: Soft deletes a saved address from the user's address book.
+- **Access**: `Bearer JWT (CUSTOMER)`
+- **Path Parameter**: `id` (address UUID)
+- **Responses**: `200 OK`: `{"success": true}`
 
 ---
 
@@ -682,3 +723,138 @@ All error responses adhere to the standard NestJS exception schema:
 - **Purpose**: Operational dashboard tracking automated AI resolution rate, first response time, and ticket volume.
 - **Access**: `ADMIN`
 - **Responses**: `200 OK`
+
+---
+
+## 20. Coupons & Promo Vouchers (`/coupons`)
+
+### `POST /coupons/validate`
+- **Purpose**: Validates customer-entered coupon codes, confirms expiration and order value thresholds, and calculates applicable discounts.
+- **Access**: `PUBLIC` / `CUSTOMER`
+- **Request Body**:
+  ```json
+  {
+    "code": "DISPATCH500",
+    "orderAmount": 3200,
+    "vendorId": "20000000-0000-0000-0000-000000000001"
+  }
+  ```
+- **Responses**:
+  - `200 OK`:
+    ```json
+    {
+      "isValid": true,
+      "code": "DISPATCH500",
+      "discountAmount": 500,
+      "message": "₦500 off welcome voucher applied!"
+    }
+    ```
+  - `400 Bad Request`:
+    ```json
+    {
+      "isValid": false,
+      "code": "EXPIRED10",
+      "discountAmount": 0,
+      "message": "Coupon code has expired or minimum threshold not met"
+    }
+    ```
+
+---
+
+## 21. Platform Operations & Interventions (`/admin`)
+
+### `GET /admin/metrics`
+- **Purpose**: Real-time aggregated platform KPIs for the Ilorin operational command center.
+- **Access**: `Bearer JWT (ADMIN, SUPPORT)`
+- **Responses**:
+  - `200 OK`:
+    ```json
+    {
+      "gmv": 428500,
+      "activeDeliveries": 4,
+      "onlineRiders": 12,
+      "escrowBalance": 87500,
+      "totalOrders": 142
+    }
+    ```
+
+### `GET /admin/orders`
+- **Purpose**: Lists active live orders with assignment state, vendor, and customer contact.
+- **Access**: `Bearer JWT (ADMIN, SUPPORT)`
+- **Responses**: `200 OK`
+
+### `PATCH /admin/orders/:id/force-status`
+- **Purpose**: Operational emergency intervention allowing dispatch managers to force an order status transition (e.g. rider phone died, emergency reassignment, manual refund). Logs mandatory audit justification.
+- **Access**: `Bearer JWT (ADMIN)`
+- **Request Body**:
+  ```json
+  {
+    "toStatus": "DELIVERED",
+    "reason": "Customer confirmed receipt via phone call; rider device battery depleted."
+  }
+  ```
+- **Responses**: `200 OK`: `{"success": true, "auditLogId": "aud_849102"}`
+
+### `GET /admin/vendors`
+- **Purpose**: Lists all registered food vendors with cluster zones, active/suspended flags, and current commission rates.
+- **Access**: `Bearer JWT (ADMIN, SUPPORT)`
+- **Responses**: `200 OK`
+
+### `PATCH /admin/vendors/:id/commission`
+- **Purpose**: Adjusts the negotiated marketplace commission percentage for a vendor.
+- **Access**: `Bearer JWT (ADMIN)`
+- **Request Body**:
+  ```json
+  {
+    "commissionRate": 0.12
+  }
+  ```
+- **Responses**: `200 OK`
+
+### `PATCH /admin/vendors/:id/status`
+- **Purpose**: Suspends or reactivates a vendor from the customer storefront.
+- **Access**: `Bearer JWT (ADMIN)`
+- **Request Body**:
+  ```json
+  {
+    "isActive": false
+  }
+  ```
+- **Responses**: `200 OK`
+
+### `GET /admin/riders`
+- **Purpose**: Fleet onboarding management listing verification status, vehicle registration, and cluster zone assignments.
+- **Access**: `Bearer JWT (ADMIN, SUPPORT)`
+- **Responses**: `200 OK`
+
+### `PATCH /admin/riders/:id/approve`
+- **Purpose**: Approves or revokes rider dispatch authorization after physical guarantor verification.
+- **Access**: `Bearer JWT (ADMIN)`
+- **Request Body**:
+  ```json
+  {
+    "isApproved": true
+  }
+  ```
+- **Responses**: `200 OK`
+
+### `GET /admin/payouts`
+- **Purpose**: Lists pending and executed NIP withdrawal requests from riders and vendors.
+- **Access**: `Bearer JWT (ADMIN, SUPPORT)`
+- **Responses**: `200 OK`
+
+### `GET /admin/reconciliation`
+- **Purpose**: Real-time double-entry ledger balance check ensuring total debits equal total credits across all accounts.
+- **Access**: `Bearer JWT (ADMIN)`
+- **Responses**:
+  - `200 OK`:
+    ```json
+    {
+      "isBalanced": true,
+      "totalDebits": 1284500,
+      "totalCredits": 1284500,
+      "imbalance": 0,
+      "discrepancyCount": 0
+    }
+    ```
+

@@ -273,6 +273,18 @@ Payment
 | C-030 | Customer cannot cancel after payment without refund | P1 |
 | C-031 | Customer can request refund before PREPARING | P2 |
 | C-032 | Customer can request refund after PREPARING (with vendor approval) | P3 |
+Address Book & Profiles
+| ID | Title | Priority |
+| :--- | :--- | :--- |
+| C-033 | Customer saves new delivery address with landmark and cluster zone | P2 |
+| C-034 | Customer selects saved address during checkout | P1 |
+| C-035 | Customer deletes saved address from address book | P3 |
+Coupons & Reviews
+| ID | Title | Priority |
+| :--- | :--- | :--- |
+| C-036 | Customer applies valid promo code (DISPATCH500) and sees discount | P1 |
+| C-037 | Customer sees validation error when entering expired or invalid coupon | P2 |
+| C-038 | Customer submits 5-star rating and review for completed delivery | P2 |
 
 ### Detailed customer test cases (samples)
 
@@ -552,6 +564,12 @@ Notifications
 | :--- | :--- | :--- |
 | V-026 | Vendor receives WhatsApp notification for new orders | P2 |
 | V-027 | Vendor receives SMS for critical issues (e.g., vendor suspended) | P3 |
+Menu Catalog & Self-Service Onboarding
+| ID | Title | Priority |
+| :--- | :--- | :--- |
+| V-028 | Vendor toggles item Sold Out / In Stock with instant customer storefront reflection | P1 |
+| V-029 | Vendor creates new dish with price in Naira and preparation time | P2 |
+| V-030 | New kitchen completes self-service registration with cluster zone and NIP bank account | P1 |
 
 ### Detailed vendor test cases (samples)
 
@@ -745,6 +763,11 @@ Wallet
 | R-026 | Rider requests cash-out | P2 |
 | R-027 | Cash-out respects wallet balance | P1 |
 | R-028 | Rider sees ledger entries | P2 |
+Fleet Profile & Safety Incidents
+| ID | Title | Priority |
+| :--- | :--- | :--- |
+| R-029 | Rider reports delivery delay or road incident (bike breakdown, rain) | P2 |
+| R-030 | Rider updates preferred operating cluster zone (Tanke, GRA, Campus) | P2 |
 
 ### Detailed rider test cases (samples)
 
@@ -926,6 +949,11 @@ Financial
 | A-020 | Admin can view wallet balances | P1 |
 | A-021 | Admin can trigger payout batch | P1 |
 | A-022 | Admin can see payouts status | P1 |
+Operational Interventions & Multi-Gateway Profiles
+| ID | Title | Priority |
+| :--- | :--- | :--- |
+| A-023 | Admin overrides live order status with mandatory audit justification reason | P1 |
+| A-024 | Admin verifies multi-gateway provider profile switching (Monnify vs Korapay vs Mock) | P2 |
 
 ### Detailed admin test case (sample)
 

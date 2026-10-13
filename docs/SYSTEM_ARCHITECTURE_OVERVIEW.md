@@ -1024,6 +1024,18 @@ Every webhook verifies signature before processing.
 
 Every webhook is idempotent (via webhook_events).
 
+### Map & Geolocation Engine Architecture
+
+Dispatch utilizes a hybrid geolocation and mapping strategy tailored to Nigerian bandwidth and cost economics:
+1. **Backend Routing & Distance Matrix**:
+   - Primary: Google Maps Platform (Distance Matrix & Directions REST API) with restricted API key.
+   - Resiliency Fallback: PostGIS `ST_DistanceSphere` and spherical Haversine formula executed internally within NestJS if Google Maps quota or network drops occur.
+2. **Customer PWA Live Order Tracker**:
+   - Implemented via an ultra-lightweight SVG vector canvas (`LiveTrackingMap.tsx`) rendering arterial corridors and motorcycle markers moving dynamically along Ilorin waypoints (Tanke $\rightarrow$ Tipper Garage $\rightarrow$ Fate Road $\rightarrow$ GRA).
+   - *Rationale*: Eliminates external Mapbox/Google Maps client tile downloads (averaging 5–15 MB of map tiles) on mobile browsers operating on slow 3G data.
+3. **Rider Mobile App Navigation**:
+   - Implemented via native Flutter `CustomPaint` vector canvas (`RouteMapPainter` in `navigation_screen.dart`) displaying turn-by-turn guidance and speed/ETA telemetry without external map tile SDK dependencies.
+   - Optional deep-link intent (`geo:lat,lng` or Google Maps app intent) available if the rider prefers external voice-guided turn-by-turn navigation.
 
 ---
 

@@ -18,6 +18,8 @@ import { PayoutsModule } from './modules/payouts/payouts.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AiModule } from './modules/ai/ai.module';
+import { CouponsModule } from './modules/coupons/coupons.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { DeviceBindingGuard } from './modules/auth/guards/device-binding.guard';
@@ -51,6 +53,8 @@ import { DeviceBindingGuard } from './modules/auth/guards/device-binding.guard';
     ReviewsModule,
     NotificationsModule,
     AiModule,
+    CouponsModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

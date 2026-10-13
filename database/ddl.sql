@@ -649,3 +649,32 @@ CREATE TRIGGER trg_wallets_touch   BEFORE UPDATE ON wallets   FOR EACH ROW EXECU
 
 DROP TRIGGER IF EXISTS trg_payouts_touch ON payouts;
 CREATE TRIGGER trg_payouts_touch   BEFORE UPDATE ON payouts   FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+
+-- 19. user_addresses
+CREATE TABLE IF NOT EXISTS user_addresses (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label        VARCHAR(50) NOT NULL,
+  address_text TEXT NOT NULL,
+  landmark     TEXT,
+  is_default   BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user ON user_addresses(user_id);
+
+-- 20. coupons
+CREATE TABLE IF NOT EXISTS coupons (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code            VARCHAR(30) UNIQUE NOT NULL,
+  discount_type   VARCHAR(20) NOT NULL,
+  discount_value  NUMERIC(14,2) NOT NULL,
+  min_order_value NUMERIC(14,2) NOT NULL DEFAULT 0,
+  max_discount    NUMERIC(14,2),
+  is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+  expires_at      TIMESTAMPTZ,
+  usage_limit     INTEGER,
+  usage_count     INTEGER NOT NULL DEFAULT 0,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
+

@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -20,5 +20,26 @@ export class UsersController {
     @Body() body: { fullName?: string; email?: string },
   ) {
     return this.usersService.updateProfile(user.sub, body);
+  }
+
+  @Get('me/addresses')
+  @UseGuards(JwtAuthGuard)
+  async getMyAddresses(@CurrentUser() user: any) {
+    return this.usersService.getAddresses(user.sub);
+  }
+
+  @Post('me/addresses')
+  @UseGuards(JwtAuthGuard)
+  async addMyAddress(
+    @CurrentUser() user: any,
+    @Body() body: { label: string; addressText: string; landmark?: string; isDefault?: boolean },
+  ) {
+    return this.usersService.addAddress(user.sub, body);
+  }
+
+  @Patch('me/addresses/:id/delete')
+  @UseGuards(JwtAuthGuard)
+  async deleteMyAddress(@CurrentUser() user: any, @Body('id') id: string) {
+    return this.usersService.deleteAddress(user.sub, id);
   }
 }

@@ -33,14 +33,19 @@ class ApiConstants {
   static String get activeDelivery => '$baseUrl/deliveries/active/me';
   static String markPickup(String deliveryId) => '$baseUrl/deliveries/$deliveryId/pickup';
   static String markDelivered(String deliveryId) => '$baseUrl/deliveries/$deliveryId/delivered';
+  static String get reportIncident => '$baseUrl/riders/incident';
 
   // Wallet & Payout endpoints
   static String get riderWallet => '$baseUrl/ledger/wallet/rider';
   static String get requestPayout => '$baseUrl/payouts/request';
 
+  // Coupons
+  static String get validateCoupon => '$baseUrl/coupons/validate';
+
   // Customer & Vendor endpoints (for mobile customer and vendor flows)
   static String get vendors => '$baseUrl/vendors?isOpenOnly=false';
   static String vendorProducts(String vendorId) => '$baseUrl/vendors/$vendorId/products';
+  static String updateProduct(String productId) => '$baseUrl/products/$productId';
   static String get createOrder => '$baseUrl/orders';
   static String initiatePayment(String orderId) => '$baseUrl/payments/initiate/$orderId';
   static String vendorOrders(String vendorId) => '$baseUrl/orders/vendor/$vendorId';

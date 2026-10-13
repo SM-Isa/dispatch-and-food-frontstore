@@ -143,3 +143,19 @@ VALUES
   ('whatsapp_intent_parser', 1, 'gemini-1.5-pro', 'You are an intelligent food ordering assistant for Nigerian tier-2 cities. Parse user intent and order schema.', 0.950, true),
   ('support_ticket_triage', 1, 'gemini-1.5-flash', 'Classify support tickets into ORDER_STATUS, WHERE_IS_RIDER, REFUND_DISPUTE, FOOD_QUALITY, or RIDER_CONDUCT.', 0.930, true)
 ON CONFLICT (key, version) DO NOTHING;
+
+-- 7. Sample Coupons
+INSERT INTO coupons (code, discount_type, discount_value, min_order_value, max_discount, is_active)
+VALUES
+  ('DISPATCH500', 'FIXED', 500.00, 2000.00, 500.00, true),
+  ('ILORIN10', 'PERCENT', 10.00, 1500.00, 1000.00, true),
+  ('FREEDELIVERY', 'FREE_DELIVERY', 800.00, 2500.00, 800.00, true)
+ON CONFLICT (code) DO NOTHING;
+
+-- 8. Sample Customer Saved Address
+INSERT INTO user_addresses (user_id, label, address_text, landmark, is_default)
+VALUES
+  ('00000000-0000-0000-0000-000000000040', 'Home', 'Block 4, University Road, Tanke, Ilorin', 'Near Tipper Garage', true),
+  ('00000000-0000-0000-0000-000000000040', 'Office', 'Plot 12, Ahmadu Bello Way, GRA, Ilorin', 'Opposite Kwara Hotel', false)
+ON CONFLICT DO NOTHING;
+

@@ -5,6 +5,7 @@ import '../core/services/api_service.dart';
 import '../core/services/location_service.dart';
 import 'wallet_screen.dart';
 import 'navigation_screen.dart';
+import 'rider_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -130,8 +131,16 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.account_balance_wallet_outlined),
+            tooltip: 'Wallet & Payouts',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const WalletScreen()),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Rider Profile & Incidents',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RiderProfileScreen()),
             ),
           ),
         ],
